@@ -1,0 +1,762 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Eu Perito</title>
+<link rel="icon" type="image/png" href="brasao.png">
+<link rel="apple-touch-icon" href="brasao.png">
+<meta name="theme-color" content="#001f54">
+<style>
+:root{
+  --bg:#f3f1ea; --ink:#23241f;
+  --card:#ffffff; --body:#3a3a33; --sub:#6b6a5e; --outerSub:#6b6a5e; --line:#d8d4c4; --cardBorder:#000000;
+  --accent:#4c6b52; --accentBg:#eaf3ea; --red:#8a2e26; --redBg:#fbeceb;
+  --chip:#f6f4ea; --chipLine:#e6e1cf; --chipPill:#c7d8c9;
+  --headerBg:#000000; --headerInk:#ffffff; --tagBg:#ffffff; --tagInk:#000000;
+  --tabActiveBg:#001f54; --tabActiveInk:#ffff00; --gold:#c9a227;
+  box-sizing:border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+:root[data-theme="dark"]{
+  --bg:#000000; --ink:#f3f1ea; --outerSub:#b9b6a6;
+  --headerBg:#001f54; --headerInk:#ffffff;
+  --tabActiveBg:#ffff00; --tabActiveInk:#001f54;
+}
+html{scroll-padding-top: env(safe-area-inset-top, 0px); height:100%;}
+body{margin:0; height:100%; background:var(--bg); color:var(--ink); font-family:Georgia,'Times New Roman',serif;}
+.sans{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;}
+button, select{font-family:inherit; cursor:pointer;}
+.wrap{max-width:720px; margin:0 auto; padding:20px 16px 60px;}
+.top{position:sticky; top:0; background:var(--bg); padding-top:calc(env(safe-area-inset-top,0px) + 12px); z-index:5; border-bottom:2px solid var(--gold);}
+.brand{display:flex; align-items:center; gap:14px; margin-bottom:6px;}
+.brasao{width:64px; height:auto; flex:none;}
+.brandText{flex:1; min-width:0;}
+.subline{font-size:13px; color:var(--outerSub); margin:0 0 4px;}
+.eyebrow{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--outerSub);}
+h1{font-size:24px; line-height:1.2; font-weight:400; margin:2px 0 6px; color:var(--ink);}
+h2{font-size:22px; font-weight:400; margin:0 0 4px; color:var(--ink);}
+.tabs{display:flex; align-items:center; gap:2px; overflow-x:auto; padding-bottom:10px; flex-wrap:wrap;}
+.tab{flex:none; padding:9px 16px; border:none; border-radius:4px; background:none; color:var(--outerSub); font-size:13px; font-weight:700; display:flex; align-items:center; gap:6px;}
+.tab.active{background:var(--tabActiveBg); color:var(--tabActiveInk);}
+.novo{background:var(--red); color:#fff; font-size:10px; padding:1px 7px; border-radius:10px; letter-spacing:.03em;}
+.filters{margin-left:auto; display:flex; gap:2px; color:var(--outerSub); font-size:13px; align-items:center;}
+select{font-size:13px; padding:4px 6px; border:none; background:transparent; color:var(--outerSub); appearance:auto;}
+.themeBtn{border:1px solid var(--gold); background:var(--card); color:var(--body); font-size:12px; font-weight:700; padding:6px 14px; border-radius:20px;}
+.card{color:var(--body); background:var(--card); border:1px solid var(--cardBorder); border-radius:4px; margin:20px 0; overflow:hidden;}
+.card .head{border-bottom:2px solid var(--gold); padding:14px 20px; background:var(--headerBg); color:var(--headerInk); font-size:11px; letter-spacing:.08em; text-transform:uppercase; display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;}
+.card .head .fonte{background:var(--tagBg); color:var(--tagInk); padding:4px 10px; border-radius:3px; text-transform:none; font-weight:700; letter-spacing:0; font-size:12px;}
+.enun{padding:26px 20px 6px; font-size:18px; line-height:1.55; color:var(--body);}
+.answerRow{display:flex; gap:10px; padding:16px 20px 20px;}
+.answerRow button{flex:1; padding:12px; border-radius:4px; border:1px solid var(--line); background:var(--card); color:var(--body); font-size:14px; font-weight:700;}
+.picks{display:flex; gap:10px; flex-wrap:wrap; padding:0;}
+.pickBadge{font-size:13px; font-weight:700; padding:8px 16px; border-radius:3px;}
+.pickBadge.mineRight{background:var(--accentBg); color:var(--accent);}
+.pickBadge.mineWrong{background:var(--redBg); color:var(--red);}
+.pickBadge.gab{background:#39ff14; color:#003d00;}
+.result{padding:0 0 22px; display:none; flex-direction:column; gap:16px;}
+.result.show{display:flex;}
+.resHead{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:0 20px;}
+.resBody{display:flex; flex-direction:column; gap:16px; padding:0 20px;}
+.result.collapsed .resBody{display:none;}
+.chev{flex:none; width:30px; height:30px; border-radius:50%; border:1px solid var(--gold); background:var(--card); color:var(--body); display:flex; align-items:center; justify-content:center; padding:0;}
+.chev svg{transition:transform .18s ease;}
+.result.collapsed .chev svg{transform:rotate(180deg);}
+.status{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-top:16px; font-size:13px; color:var(--outerSub);}
+.linkBtn{background:none; border:none; color:var(--outerSub); text-decoration:underline; font-size:13px; padding:0;}
+.linkBtn.warn{color:var(--red); font-weight:700; text-decoration:none;}
+.pager{display:flex; align-items:center; justify-content:center; gap:14px; margin:26px 0 8px;}
+.pgBtn{border:1px solid var(--gold); background:var(--card); color:var(--body); font-size:13px; font-weight:700; padding:8px 16px; border-radius:20px;}
+.pgBtn:disabled{opacity:.4; cursor:default;}
+.pgInfo{color:var(--outerSub); font-size:13px;}
+.block{border-top:1px solid var(--line); padding-top:16px; margin-top:4px;}
+.label{font-size:11px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; margin-bottom:8px;}
+.label.correta{color:var(--red);}
+.label.just{color:var(--sub);}
+.label.fixarLabel{color:var(--accent);}
+.txt{font-size:15px; line-height:1.6; color:var(--body);}
+.fixar{border-left:3px solid var(--gold); color:var(--body); background:var(--chip); border:1px solid var(--chipLine); border-radius:4px; padding:18px 20px; display:flex; gap:16px; align-items:flex-start;}
+.fixar .icon{font-size:20px; line-height:1.3;}
+.chipsRow{color:var(--body); display:flex; align-items:center; gap:6px; flex-wrap:wrap; font-size:13px; margin-bottom:8px;}
+.chipsRow .arrow{color:var(--sub);}
+.chipsRow .c{padding:6px 12px; background:var(--card); border:1px solid var(--chipPill); border-radius:16px;}
+.chipsRow .c.last{background:var(--accent); color:#fff; border-color:var(--accent);}
+.fixarNote{font-size:13px; font-style:italic; color:var(--accent);}
+.empty{text-align:center; color:var(--outerSub); padding:40px 20px; font-size:15px;}
+.revPill{font-size:11px; background:var(--tagBg); color:var(--tagInk); padding:2px 8px; border-radius:9px; text-transform:none; letter-spacing:0;}
+.sectionHead{padding-top:24px; margin-top:24px; border-top:1px solid var(--line);}
+.rankRow{border-left:3px solid var(--gold); color:var(--body); display:flex; align-items:center; gap:16px; background:var(--card); border:1px solid var(--line); border-radius:4px; padding:16px 20px; margin:10px 0;}
+.rankNum{background:var(--red); color:#fff; font-weight:700; font-size:16px; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+.rankNum.low{background:var(--line); color:var(--sub);}
+.rankTitle{font-size:15px; font-weight:700; color:var(--body);}
+.rankSub{font-size:12px; color:var(--sub); margin-top:2px;}
+.rankCount{font-size:12px; color:var(--accent); font-weight:700; white-space:nowrap;}
+.rankCount.low{color:var(--sub); font-weight:700;}
+
+/* ---- Login / conta ---- */
+.authWrap{position:fixed; inset:0; z-index:50; background:var(--bg); display:none; align-items:flex-start; justify-content:center; overflow-y:auto; padding:calc(env(safe-area-inset-top,0px) + 40px) 16px 40px;}
+.authWrap.show{display:flex;}
+.authBox{width:100%; max-width:400px; background:var(--card); color:var(--body); border:1px solid var(--cardBorder); border-radius:4px; overflow:hidden;}
+.authHead{background:var(--headerBg); color:var(--headerInk); border-bottom:2px solid var(--gold); padding:22px 20px; text-align:center;}
+.authHead img{width:84px; height:auto; display:block; margin:0 auto 10px;}
+.authHead .t{font-size:22px;}
+.authHead .s{font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--gold); margin-top:4px;}
+.authBody{padding:20px; display:flex; flex-direction:column; gap:12px;}
+.authBody label{font-size:11px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; color:var(--sub);}
+.authBody input{width:100%; box-sizing:border-box; font-size:16px; padding:11px 12px; border:1px solid var(--line); border-radius:4px; background:#fff; color:#23241f;}
+.authBody input:focus{outline:2px solid var(--gold); outline-offset:0;}
+.btnMain{padding:12px; border:none; border-radius:4px; background:#001f54; color:#ffff00; font-size:14px; font-weight:700;}
+.btnMain:disabled{opacity:.6;}
+.authMsg{font-size:13px; min-height:1em; color:var(--accent);}
+.authMsg.err{color:var(--red);}
+.authLinks{display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;}
+.authLinks .linkBtn{color:var(--sub);}
+.guestBtn{border-top:1px solid var(--line); padding-top:12px; text-align:center;}
+.userBar{display:flex; align-items:center; gap:8px;}
+.userBtn{border:1px solid var(--gold); background:var(--card); color:var(--body); font-size:12px; font-weight:700; padding:6px 12px; border-radius:20px; max-width:170px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.syncDot{width:8px; height:8px; border-radius:50%; background:var(--line); flex:none;}
+.syncDot.on{background:#2e9e44;}
+.syncDot.busy{background:var(--gold);}
+.syncDot.err{background:var(--red);}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="wrap" style="padding-bottom:0">
+    <div class="brand">
+      <img class="brasao" src="brasao.png" alt="Brasão Eu Perito — Polícia Científica">
+      <div class="brandText">
+        <div class="eyebrow" style="display:flex; justify-content:space-between; align-items:center; gap:10px">
+          <span>Perito Criminal — Medicina Veterinária</span>
+          <span class="userBar"><span class="syncDot" id="syncDot" title="Sincronização"></span><button class="userBtn sans" id="userBtn">Entrar</button><button class="themeBtn sans" id="themeBtn">☀️ Claro</button></span>
+        </div>
+        <h1>Estude como quem já é Perito.</h1>
+        <div class="subline sans">Questões reais e atualizadas: só provas dos últimos 4 anos.</div>
+      </div>
+    </div>
+    <div class="tabs sans">
+      <button class="tab active" data-tab="objetivas">Objetivas</button>
+      <button class="tab" data-tab="revisar">Revisar erros</button>
+      <button class="tab" data-tab="cobrado">Mais cobrado <span class="novo">Novo</span></button>
+      <div class="filters">
+        <span>Filtro:</span>
+        <select id="fDisc"><option value="">Disciplina</option></select>
+        <select id="fBanca"><option value="">Banca</option></select>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="authWrap sans" id="authWrap" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+  <div class="authBox">
+    <div class="authHead"><img src="brasao.png" alt=""><div class="t" id="authTitle" style="font-family:Georgia,serif">Eu Perito</div><div class="s">Estude como quem já é Perito</div></div>
+    <form class="authBody" id="authForm" autocomplete="on">
+      <div id="authModeTitle" style="font-size:15px; font-weight:700">Entrar na sua conta</div>
+      <div id="emailRow"><label for="authEmail">E-mail</label><input id="authEmail" type="email" autocomplete="email" required></div>
+      <div id="passRow"><label for="authPass">Senha</label><input id="authPass" type="password" autocomplete="current-password" minlength="6" required></div>
+      <button class="btnMain" id="authSubmit" type="submit">Entrar</button>
+      <div class="authMsg" id="authMsg" aria-live="polite"></div>
+      <div class="authLinks"><button type="button" class="linkBtn" id="authSwitch">Criar conta</button><button type="button" class="linkBtn" id="authForgot">Esqueci a senha</button></div>
+      <div class="guestBtn"><button type="button" class="linkBtn" id="authGuest">Continuar sem conta (progresso só neste aparelho)</button></div>
+    </form>
+  </div>
+</div>
+<div class="wrap" id="list"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+"use strict";
+
+var THEME_KEY = "vetstudy_theme_v1";
+function getTheme(){
+  try{ return localStorage.getItem(THEME_KEY) || "light"; }catch(e){ return "light"; }
+}
+function setTheme(t){
+  document.documentElement.setAttribute("data-theme", t);
+  try{ localStorage.setItem(THEME_KEY, t); }catch(e){}
+  var btn = document.getElementById("themeBtn");
+  if(btn) btn.textContent = t === "dark" ? "🌙 Escuro" : "☀️ Claro";
+}
+setTheme(getTheme());
+document.getElementById("themeBtn").addEventListener("click", function(){
+  setTheme(getTheme() === "dark" ? "light" : "dark");
+});
+
+var Q = [
+{id:"crim01", disc:"Criminalística", tema:"Balística", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"Quanto maior o calibre da arma de fogo, maior será a velocidade que o seu projétil atingirá ao sair do cano.",
+ gab:"E",
+ correta:"A velocidade do projétil depende sobretudo do tipo de pólvora e do comprimento do cano — não do calibre isoladamente. A pólvora de queima lenta mantém a aceleração do projétil por mais tempo, sendo melhor aproveitada em armas de cano longo.",
+ just:"Calibre é a medida do diâmetro do projétil/alma do cano, não um indicador direto de velocidade de saída. Armas de cano longo com pólvora de queima lenta aproveitam mais tempo de aceleração antes do projétil deixar o cano.",
+ fixar:"Velocidade = pólvora certa + cano comprido, não calibre grande."},
+
+{id:"crim02", disc:"Criminalística", tema:"Cadeia de Custódia", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"Em caso de suspeita de maus-tratos a animais, a cadeia de custódia dos vestígios coletados no local do crime pode ser iniciada apenas no momento da entrega ao laboratório de perícia, sendo dispensável o registro do momento da coleta.",
+ gab:"E",
+ correta:"A cadeia de custódia tem início no reconhecimento e na coleta do vestígio, ainda no local de crime — não apenas na entrega ao laboratório.",
+ just:"O art. 158-B do CPP define a cadeia de custódia como o conjunto de procedimentos que visa manter e documentar a história cronológica do vestígio, começando pelo reconhecimento do vestígio ainda no local de crime. Omitir o registro do momento da coleta compromete a rastreabilidade exigida pela norma.",
+ fixarChips:["Reconhecimento","Coleta","Acondicionamento","Transporte","Laboratório"],
+ fixarNote:"A cadeia começa no local, não no laboratório."},
+
+{id:"crim03", disc:"Criminalística", tema:"Exame de corpo de delito", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"O exame de corpo de delito poderá ser feito em qualquer dia e a qualquer hora.",
+ gab:"C",
+ just:"O art. 161 do CPP estabelece expressamente que o exame de corpo de delito pode ser realizado a qualquer dia e hora, dada a urgência de preservar vestígios que se degradam com o tempo.",
+ fixar:"Corpo de delito não espera expediente — vestígio não tira folga."},
+
+{id:"crim04", disc:"Criminalística", tema:"Exame de corpo de delito", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"O agente público deve dar prioridade à realização do exame de corpo de delito quando o delito envolver violência doméstica ou contra a mulher.",
+ gab:"C",
+ just:"A legislação de proteção à mulher (em linha com a Lei Maria da Penha e alterações no CPP) determina tratamento prioritário para perícias em casos de violência doméstica, dada a urgência probatória e o risco de reiteração.",
+ fixar:"Violência doméstica fura fila de perícia — é prioridade legal, não favor."},
+
+{id:"legal01", disc:"Medicina Legal", tema:"Asfixiologia forense", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"A asfixiologia forense é definida como o estudo das mortes por privação de oxigênio, analisando mecanismos e sinais post-mortem para diferenciar causas criminosas de acidentais em perícias.",
+ gab:"C",
+ just:"É exatamente esse o objeto da asfixiologia forense: mecanismo de morte por hipóxia (enforcamento, estrangulamento, sufocamento, afogamento etc.) e a leitura dos sinais post-mortem para orientar a qualificação jurídica do fato (homicídio, acidente, suicídio).",
+ fixar:"Asfixiologia = ciência do 'por que faltou ar' aplicada à investigação."},
+
+{id:"legal02", disc:"Medicina Legal", tema:"Traumatologia forense", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"A traumatologia forense estuda as lesões corporais e suas consequências jurídicas, permitindo identificar a causalidade do dano em contextos criminais.",
+ gab:"C",
+ just:"Traumatologia forense é o ramo que correlaciona o tipo de lesão ao instrumento e à dinâmica do evento, fornecendo o nexo causal técnico que sustenta a tipificação penal (lesão corporal, homicídio etc.).",
+ fixar:"Toda lesão 'conta uma história' — a traumatologia forense é quem traduz."},
+
+{id:"legal03", disc:"Medicina Legal", tema:"Lesões — mecanismo", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"Lesões incisas caracterizam-se por serem irregulares, com esmagamento tecidual, típicas de impactos contundentes.",
+ gab:"E",
+ correta:"Essa descrição corresponde às lesões contusas, não às incisas. Lesões incisas são ferimentos lineares, de bordas regulares e pouca perda tecidual, produzidos por agentes cortantes (armas brancas).",
+ just:"O enunciado inverteu os conceitos: 'irregular com esmagamento' é a marca da lesão contusa (agente rombo); a lesão incisa é limpa, linear e regular, característica de instrumento cortante.",
+ fixar:"Incisa = corte limpo e reto. Contusa = irregular e esmagada."},
+
+{id:"pen01", disc:"Direito Penal", tema:"Crimes contra o patrimônio", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"O crime de furto se consuma quando o agente da infração penal passa a ter o poder sobre o objeto do furto.",
+ gab:"C",
+ just:"Prevalece o entendimento (inclusive sumulado pelo STJ, Súmula 582) de que o furto se consuma com a posse de fato sobre a coisa subtraída, ainda que breve e vigiada, sendo dispensável a posse mansa e pacífica ou o afastamento do local.",
+ fixar:"Furto consuma no 'agora é meu', não precisa fugir com sucesso."},
+
+{id:"pen02", disc:"Direito Penal", tema:"Culpabilidade", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"A culpabilidade do agente poderá ser excluída em razão de obediência hierárquica.",
+ gab:"C",
+ just:"O art. 22 do Código Penal prevê a obediência hierárquica à ordem não manifestamente ilegal de superior como causa de exclusão da culpabilidade (inexigibilidade de conduta diversa), respondendo apenas quem deu a ordem.",
+ fixar:"Ordem não manifestamente ilegal + hierarquia = culpa some do subordinado."},
+
+{id:"pen03", disc:"Direito Penal", tema:"Sujeitos da infração penal", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"O Estado, cuja norma penal foi violada, é o sujeito passivo formal (constante) de uma infração penal.",
+ gab:"C",
+ just:"Todo crime tem o Estado como sujeito passivo formal/constante, por ser o titular do ius puniendi violado; o sujeito passivo material (eventual) é a vítima direta do bem jurídico atingido, que pode ou não existir a depender do delito.",
+ fixar:"Passivo formal é sempre o Estado; passivo material é quem sofreu de fato."},
+
+{id:"ppen01", disc:"Direito Processual Penal", tema:"Inquérito policial", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"Todos os atos e procedimentos realizados ao longo do inquérito policial deverão ser documentados.",
+ gab:"C",
+ just:"A documentação integral dos atos do inquérito é exigência do próprio CPP, garantindo a rastreabilidade da investigação e servindo de base às fases seguintes (denúncia, instrução processual).",
+ fixar:"Inquérito sem registro escrito não vale como prova depois."},
+
+{id:"ppen02", disc:"Direito Processual Penal", tema:"Inquérito policial", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"O inquérito policial é um procedimento de natureza administrativa destinado à reunião de informações preliminares que possibilitem o ajuizamento ou não de uma ação penal.",
+ gab:"C",
+ just:"Natureza administrativa (não jurisdicional), inquisitivo e preparatório: reúne autoria e materialidade para subsidiar a decisão do titular da ação penal — em regra o Ministério Público — sobre oferecer ou não a denúncia.",
+ fixar:"Inquérito não julga, só instrui quem vai decidir se processa."},
+
+{id:"const01", disc:"Direito Constitucional", tema:"Nacionalidade", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"São cargos privativos de brasileiros natos o de Ministro de Estado da Fazenda e o de Ministro do Superior Tribunal de Justiça, além da Presidência do Senado Federal e da Câmara dos Deputados.",
+ gab:"E",
+ correta:"Só a Presidência do Senado Federal e da Câmara dos Deputados, entre os citados, são privativas de natos. O art. 12, §3º, da CF lista: Presidente e Vice-Presidente da República, Presidente da Câmara, Presidente do Senado, Ministro do STF (não do STJ), carreira diplomática, oficial das Forças Armadas e Ministro de Estado da Defesa (não da Fazenda).",
+ just:"O rol do art. 12, §3º da CF é taxativo e específico: Ministro da Defesa entra, Ministro da Fazenda não; Ministro do STF entra, do STJ não. É pegadinha clássica trocar STF por STJ e Defesa por outra pasta.",
+ fixar:"Decore o rol dos 7: PR, VP, Câmara, Senado, STF, diplomata, militar + Ministro da Defesa."},
+
+{id:"adm01", disc:"Direito Administrativo", tema:"Responsabilidade civil do Estado", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"A responsabilidade civil objetiva do Estado não se confunde com a responsabilidade subjetiva dos seus agentes, sendo esta última pressuposto da ação regressiva.",
+ gab:"C",
+ just:"O Estado responde objetivamente perante o terceiro lesado (teoria do risco administrativo); já a ação regressiva contra o agente público exige a demonstração de dolo ou culpa (responsabilidade subjetiva) daquele agente.",
+ fixar:"Estado paga sem discutir culpa; pra cobrar do servidor depois, aí sim precisa provar culpa."},
+
+{id:"adm02", disc:"Direito Administrativo", tema:"Improbidade administrativa", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"A voluntariedade não é motivo suficiente para caracterizar um ato de improbidade administrativa.",
+ gab:"C",
+ just:"Após a Lei 14.230/2021, a improbidade administrativa exige dolo específico (vontade de atingir o resultado ilícito), não bastando a mera voluntariedade da conduta — é preciso a intenção de violar o dever de probidade.",
+ fixar:"Só 'ter feito de propósito' não basta — improbidade hoje pede dolo específico."},
+
+{id:"vet01", disc:"Medicina Veterinária Forense", tema:"Causas de morte violenta", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"São exemplos de causa de morte violenta em animais: trauma contuso, eletrocussão e asfixia por enforcamento.",
+ gab:"C",
+ just:"Causa de morte violenta é toda morte de origem externa/traumática (trauma, eletrocussão, asfixia mecânica), em contraposição às causas naturais (doenças, neoplasias, insuficiências orgânicas espontâneas).",
+ fixar:"Violenta = veio de fora (trauma/choque/asfixia). Natural = veio de dentro do corpo."},
+
+{id:"vet02", disc:"Medicina Veterinária Forense", tema:"Necropsia", fonte:"AOCP · Politec-PE · 2024 (adaptada)",
+ enun:"Na necropsia veterinária realizada para fins periciais, o exame deve ser conduzido o mais brevemente possível após a morte, a fim de minimizar alterações cadavéricas que possam mascarar achados de interesse pericial.",
+ gab:"C",
+ just:"Os fenômenos cadavéricos transformativos — autólise, putrefação — avançam mais rápido em animais de pequeno porte do que no ser humano. Quanto maior o intervalo pós-morte (IPM), maior a chance de achados como equimoses, hemorragias e lesões de tecidos moles serem descaracterizados.",
+ fixar:"Necropsia forense é corrida contra o relógio: quanto antes, menos autólise mascarando o vestígio."},
+
+{id:"vet03", disc:"Medicina Veterinária Forense", tema:"Cronotanatognose e fenômenos cadavéricos", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"A putrefação é um fenômeno transformador destrutivo, condicionado por fatores extrínsecos e intrínsecos, sendo a mancha verde abdominal (ou esternal, em algumas espécies) um de seus primeiros sinais.",
+ gab:"C",
+ just:"A putrefação é o principal fenômeno destrutivo pós-morte, com fases sucessivas (cromática, gasosa, coliquativa, esqueletização); a mancha verde é classicamente o primeiro sinal visível da fase cromática, surgindo tipicamente entre 18-24h em condições ambientes moderadas, variando com temperatura e espécie.",
+ fixar:"Mancha verde = primeiro aviso visual do relógio da putrefação começando a andar."},
+
+{id:"vet04", disc:"Medicina Veterinária Forense", tema:"Cronotanatognose e fenômenos cadavéricos", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"A coloração verde da putrefação decorre da reação do gás sulfídrico, de origem bacteriana intestinal, com a hemoglobina, formando sulfemetoglobina na parede abdominal.",
+ gab:"C",
+ just:"A flora bacteriana intestinal produz gás sulfídrico (H2S), que se combina com a hemoglobina liberada dos vasos, formando sulfemetoglobina — pigmento esverdeado responsável pela mancha verde abdominal característica.",
+ fixar:"Bactéria do intestino + hemoglobina = gás + pigmento verde na barriga."},
+
+{id:"vet05", disc:"Medicina Veterinária Forense", tema:"Toxicologia forense — amostras", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"Diante de suspeita de intoxicação aguda em necropsia, o conjunto de amostras prioritário e mais completo para análise toxicológica é: conteúdo gástrico, um fragmento de fígado, um fragmento de rim, urina e sangue total (preferencialmente da cavidade cardíaca).",
+ gab:"C",
+ just:"Esse conjunto cobre a via de entrada (conteúdo gástrico), os principais órgãos metabolizadores/excretores (fígado, rim) e a matriz sistêmica (sangue, urina), maximizando a chance de identificar o agente e sua rota metabólica.",
+ fixar:"Estômago (entrada) + fígado/rim (metabolismo) + sangue/urina (circulação) = kit completo."},
+
+{id:"vet06", disc:"Medicina Veterinária Forense", tema:"Entomologia forense e IPM", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"Em uma carcaça a cerca de 27°C, com massas de larvas de Calliphoridae em terceiro ínstar (L3) e presença de besouros Silphidae predando essas larvas, o Intervalo Pós-Morte mais provável está entre 4 e 7 dias.",
+ gab:"C",
+ just:"A colonização por Calliphoridae já em L3 (último estágio larval) indica alguns dias de decomposição ativa, e a chegada da segunda onda de colonizadores (Silphidae, predadores) reforça uma janela de aproximadamente 4 a 7 dias — sob temperatura considerada nesse cálculo (~27°C acelera o desenvolvimento em relação a climas frios).",
+ fixar:"1ª onda em L3 + 2ª onda já chegando = pense em dias (4-7), não em horas."},
+
+{id:"vet07", disc:"Medicina Veterinária Forense", tema:"Traumatologia forense veterinária", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"O estrangulamento diferencia-se do enforcamento por ser uma constrição do pescoço exercida por um laço acionado por força externa (mãos, braços ou instrumento), e não pelo peso do próprio corpo do animal.",
+ gab:"C",
+ just:"A distinção clássica em asfixiologia forense: no enforcamento a força constritora é o próprio peso do corpo suspenso; no estrangulamento a força é externa, aplicada por um agente diferente do peso corporal da vítima.",
+ fixar:"Enforcamento: o peso do corpo aperta. Estrangulamento: alguém (ou algo) de fora aperta."},
+
+{id:"vet08", disc:"Medicina Veterinária Forense", tema:"Maus-tratos e Teoria do Elo", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"Segundo a Teoria do Elo, o médico-veterinário atua como sentinela, pois a identificação de lesões não acidentais em animais pode ser indicador precoce de violência doméstica, abuso infantil ou maus-tratos a idosos.",
+ gab:"C",
+ just:"A Teoria do Elo (link theory) é sustentada por correlação epidemiológica e comportamental entre violência contra animais e violência interpessoal no mesmo ambiente familiar; por isso o veterinário pericial tem papel de alerta precoce ('sentinela') para a rede de proteção humana.",
+ fixar:"Animal maltratado em casa pode ser o primeiro sinal visível de uma casa violenta."},
+
+{id:"vet09", disc:"Medicina Veterinária Forense", tema:"Cadeia de custódia", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"A principal finalidade da cadeia de custódia é garantir a rastreabilidade e a integridade da prova, documentando todas as pessoas que tiveram acesso ao vestígio desde a coleta até o descarte.",
+ gab:"C",
+ just:"Rastreabilidade (quem, quando, onde) e integridade (sem alteração/substituição) são os dois pilares da cadeia de custódia, aplicáveis igualmente a perícias com animais vivos ou mortos.",
+ fixar:"Cadeia de custódia = 'quem tocou, quando e por quê', do início ao fim, sem furo."},
+
+{id:"vet10", disc:"Medicina Veterinária Forense", tema:"Toxicologia veterinária — antagonistas", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"Diante de intoxicação por Xilazina (agonista alfa-2 adrenérgico) em animal vivo, o antagonista específico indicado para reversão imediata dos efeitos é a Ioimbina.",
+ gab:"C",
+ just:"A Ioimbina é o antagonista alfa-2 adrenérgico de escolha para reverter os efeitos sedativos da Xilazina — distinto de Naloxona (opioides), Flumazenil (benzodiazepínicos) e Atropina (efeitos muscarínicos).",
+ fixar:"Xilazina entra, Ioimbina reverte — são o par certo, não confundir com Naloxona/Flumazenil."},
+
+{id:"vet11a", disc:"Medicina Veterinária Forense", tema:"Toxicologia forense — espécie felina", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"Em felinos, a deficiência da enzima glucuroniltransferase torna o Paracetamol especialmente tóxico, sendo o metabólito reativo NAPQI responsável por estresse oxidativo nas hemácias (formação de corpúsculos de Heinz, metemoglobinemia) e hepatotoxicidade.",
+ gab:"C",
+ just:"Gatos metabolizam mal substâncias que dependem de glucuronidação; o Paracetamol gera NAPQI em excesso, causando dano oxidativo eritrocitário (Heinz, metemoglobinemia com sangue achocolatado) e necrose hepática centrolobular — quadro clássico de intoxicação acidental/dolosa por analgésico humano em felinos.",
+ fixar:"Gato + paracetamol humano = combinação perigosa: falta a enzima que desintoxica."},
+
+{id:"vet11", disc:"Medicina Veterinária Forense", tema:"Doenças de notificação obrigatória", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"Um surto em suínos jovens com mortalidade elevada, febre alta, pústulas cutâneas hemorrágicas e sinais nervosos exige notificação compulsória e imediata ao Serviço Veterinário Oficial, com suspeita principal de Peste Suína Clássica.",
+ gab:"C",
+ just:"A Peste Suína Clássica é doença de notificação compulsória imediata no Brasil por seu impacto sanitário e econômico; o quadro descrito (mortalidade alta em jovens, sinais hemorrágicos e nervosos) é clássico da doença e não pode aguardar confirmação laboratorial para ser comunicado.",
+ fixar:"Suspeita de PSC não espera exame — comunica primeiro, confirma depois."},
+
+{id:"vet12", disc:"Medicina Veterinária Forense", tema:"Crimes contra a fauna", fonte:"FEPESE · PCISC/SC · 2026",
+ enun:"Manter um papagaio-verdadeiro (Amazona aestiva) sem anilha e registro, com sinais de estresse crônico e lesões por contenção inadequada, configura crime de maus-tratos e manutenção irregular de fauna silvestre, independentemente de a espécie ser considerada de baixa mobilidade ou adaptada ao convívio humano.",
+ gab:"C",
+ just:"A Lei de Crimes Ambientais (9.605/98) não condiciona a tipificação à docilidade ou popularidade da espécie como animal de estimação; a ausência de registro/anilha e a presença de lesões por manejo inadequado configuram, cumulativamente, maus-tratos e manutenção irregular de fauna silvestre.",
+ fixar:"Fofura da espécie não vira licença — sem anilha e com lesão, é crime do mesmo jeito."}
+];
+
+var RANK = [
+  {n:3, title:"Cadeia de custódia — etapas e rastreabilidade", subs:"FEPESE · PCISC/SC 2026  ·  AOCP · Politec-PE 2024  ·  CESPE · Politec-PE 2016"},
+  {n:2, title:"Cronotanatognose e fenômenos cadavéricos (IPM)", subs:"FEPESE · PCISC/SC 2026  ·  AOCP · Politec-PE 2024"},
+  {n:1, title:"Reação vital em lesões (ante x post-mortem)", subs:"FEPESE · PCISC/SC 2026"}
+];
+
+var STORE_KEY = "vetstudy_state_v1";
+function loadState(){
+  try{
+    var raw = localStorage.getItem(STORE_KEY);
+    var st = raw ? JSON.parse(raw) : {}; st.wrong = st.wrong||{}; st.done = st.done||{}; st.picks = st.picks||{}; return st;
+  }catch(e){ return {wrong:{}, done:{}, picks:{}}; }
+}
+function saveState(s){
+  s.updatedAt = new Date().toISOString();
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(s)); }catch(e){}
+  if(window.EP_SYNC) window.EP_SYNC.push(s);
+}
+var state = loadState();
+
+var currentTab = "objetivas";
+var fDisc = "";
+var fBanca = "";
+
+function uniq(arr){ return arr.filter(function(v,i){return arr.indexOf(v)===i;}); }
+
+function fillFilters(){
+  var discs = uniq(Q.map(function(q){return q.disc;}));
+  var bancas = uniq(Q.map(function(q){return q.fonte.split(" · ")[0];}));
+  var selD = document.getElementById("fDisc");
+  var selB = document.getElementById("fBanca");
+  discs.forEach(function(d){ var o=document.createElement("option"); o.value=d; o.textContent=d; selD.appendChild(o); });
+  bancas.forEach(function(b){ var o=document.createElement("option"); o.value=b; o.textContent=b; selB.appendChild(o); });
+  selD.addEventListener("change", function(){ fDisc = selD.value; resetView(); });
+  selB.addEventListener("change", function(){ fBanca = selB.value; resetView(); });
+}
+
+function filteredList(){
+  var base = Q;
+  if(currentTab === "revisar"){
+    base = base.filter(function(q){ return state.wrong[q.id]; });
+  }
+  if(fDisc) base = base.filter(function(q){ return q.disc === fDisc; });
+  if(fBanca) base = base.filter(function(q){ return q.fonte.indexOf(fBanca) === 0; });
+  return base;
+}
+
+function esc(s){ var d=document.createElement("div"); d.textContent=s; return d.innerHTML; }
+
+var PAGE_SIZE = 10;
+var page = 1;
+var viewOrder = [];
+var restartArmed = false;
+
+function byId(id){ return Q.filter(function(x){return x.id===id;})[0]; }
+
+function buildOrder(){
+  var base = filteredList();
+  if(currentTab === "objetivas"){
+    var pending = base.filter(function(q){ return !state.picks[q.id]; });
+    var done = base.filter(function(q){ return !!state.picks[q.id]; });
+    base = pending.concat(done);
+  }
+  viewOrder = base.map(function(q){ return q.id; });
+}
+
+function resetView(){
+  page = 1; restartArmed = false;
+  buildOrder();
+  render();
+}
+
+function cardHTML(q){
+  var errouAntes = !!state.wrong[q.id];
+  return (
+  '<div class="card" data-id="'+q.id+'">'+
+    '<div class="head"><span>'+esc(q.disc)+' · '+esc(q.tema)+(errouAntes?' <span class="revPill">Revisão</span>':'')+'</span><span class="fonte">'+esc(q.fonte)+'</span></div>'+
+    '<div class="enun">'+esc(q.enun)+'</div>'+
+    '<div class="answerRow">'+
+      '<button data-pick="C">Certo</button>'+
+      '<button data-pick="E">Errado</button>'+
+    '</div>'+
+    '<div class="result"></div>'+
+  '</div>');
+}
+
+var CHEV = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l4-4 4 4"/></svg>';
+
+function fillResult(card, q, picked, collapsed){
+  var acertou = picked === q.gab;
+  var res = card.querySelector(".result");
+  var mineClass = acertou ? "mineRight" : "mineWrong";
+  var mineIcon = acertou ? "✅" : "❌";
+
+  var html = '<div class="resHead"><div class="picks">'+
+    '<span class="pickBadge '+mineClass+'">'+mineIcon+' Você marcou: '+(picked==="C"?"Certo":"Errado")+'</span>'+
+    '<span class="pickBadge gab">Gabarito: '+(q.gab==="C"?"Certo":"Errado")+'</span>'+
+  '</div><button class="chev" aria-expanded="'+(collapsed?"false":"true")+'" aria-label="'+(collapsed?"Expandir gabarito":"Recolher gabarito")+'">'+CHEV+'</button></div>';
+
+  html += '<div class="resBody">';
+  if(q.gab === "E" && q.correta){
+    html += '<div class="block"><div class="label correta">Forma correta</div><div class="txt">'+esc(q.correta)+'</div></div>';
+  }
+  html += '<div class="block"><div class="label just">Justificativa</div><div class="txt">'+esc(q.just)+'</div></div>';
+
+  if(q.fixarChips){
+    var chipsHtml = q.fixarChips.map(function(c,i){
+      var isLast = i === q.fixarChips.length-1;
+      var arrow = i>0 ? '<span class="arrow">→</span>' : '';
+      return arrow + '<span class="c'+(isLast?' last':'')+'">'+esc(c)+'</span>';
+    }).join("");
+    html += '<div class="fixar"><div class="icon">🧠</div><div style="flex:1"><div class="label fixarLabel">Para fixar</div><div class="chipsRow">'+chipsHtml+'</div>'+(q.fixarNote?'<div class="fixarNote">'+esc(q.fixarNote)+'</div>':'')+'</div></div>';
+  } else if(q.fixar){
+    html += '<div class="fixar"><div class="icon">🧠</div><div style="flex:1"><div class="label fixarLabel">Para fixar</div><div class="txt">'+esc(q.fixar)+'</div></div></div>';
+  }
+  html += '</div>';
+
+  res.innerHTML = html;
+  res.className = "result show" + (collapsed ? " collapsed" : "");
+  card.querySelector(".answerRow").style.display = "none";
+
+  var chev = res.querySelector(".chev");
+  chev.addEventListener("click", function(){
+    var nowCollapsed = res.classList.toggle("collapsed");
+    chev.setAttribute("aria-expanded", nowCollapsed ? "false" : "true");
+    chev.setAttribute("aria-label", nowCollapsed ? "Expandir gabarito" : "Recolher gabarito");
+  });
+}
+
+function answerQuestion(card, q, picked){
+  fillResult(card, q, picked, false);
+  var acertou = picked === q.gab;
+  if(!acertou){ state.wrong[q.id] = true; } else { delete state.wrong[q.id]; }
+  state.picks[q.id] = picked;
+  state.done[q.id] = true;
+  saveState(state);
+  if(window.EP_SYNC) window.EP_SYNC.logAnswer(q.id, picked, acertou);
+  updateCount();
+}
+
+function answeredCount(){
+  return viewOrder.filter(function(id){ return !!state.picks[id]; }).length;
+}
+
+function updateCount(){
+  var el = document.getElementById("cnt");
+  if(el) el.textContent = answeredCount() + " de " + viewOrder.length + " respondidas";
+}
+
+function rankRowHTML(r){
+  var numClass = r.n >= 2 ? "" : " low";
+  var countTxt = r.n >= 2 ? (r.n + " provas") : "ainda só 1";
+  var countClass = r.n >= 2 ? "" : " low";
+  return '<div class="rankRow">'+
+    '<div class="rankNum'+numClass+'">'+r.n+'</div>'+
+    '<div style="flex:1"><div class="rankTitle">'+esc(r.title)+'</div><div class="rankSub sans">'+esc(r.subs)+'</div></div>'+
+    '<div class="rankCount'+countClass+' sans">'+countTxt+'</div>'+
+  '</div>';
+}
+
+function pagerHTML(totalPages){
+  if(totalPages <= 1) return "";
+  return '<div class="pager sans">'+
+    '<button class="pgBtn" id="pgPrev"'+(page<=1?' disabled':'')+'>‹ Anterior</button>'+
+    '<span class="pgInfo">Página '+page+' de '+totalPages+'</span>'+
+    '<button class="pgBtn" id="pgNext"'+(page>=totalPages?' disabled':'')+'>Próxima ›</button>'+
+  '</div>';
+}
+
+function render(){
+  var list = document.getElementById("list");
+  if(currentTab === "cobrado"){
+    list.innerHTML = '<div class="eyebrow" style="margin-top:8px">Assuntos que já caíram em mais de uma banca</div>'+
+      '<h2>Seu radar de prioridade</h2>'+
+      '<div class="txt sans" style="color:var(--outerSub); margin-bottom:16px">Ranqueado por número de provas diferentes que já cobraram o tema. Clique num tema pra treinar só ele.</div>'+
+      RANK.map(rankRowHTML).join("");
+    return;
+  }
+  if(viewOrder.length === 0){
+    list.innerHTML = '<div class="empty sans">'+(currentTab==="revisar" ? "Nada pra revisar por aqui ainda — erre uma questão em Objetivas e ela aparece nesta aba." : "Nenhuma questão com esse filtro.")+'</div>';
+    return;
+  }
+  var totalPages = Math.max(1, Math.ceil(viewOrder.length / PAGE_SIZE));
+  if(page > totalPages) page = totalPages;
+  var ids = viewOrder.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
+
+  var statusHtml = '<div class="status sans"><span id="cnt"></span>';
+  if(currentTab === "revisar"){ statusHtml = '<div class="status sans"><span>'+viewOrder.length+' para revisar</span>'; }
+  if(currentTab === "objetivas"){
+    statusHtml += restartArmed
+      ? '<span><button class="linkBtn warn" id="restartOk">Confirmar: apagar respostas e voltar ao início</button> · <button class="linkBtn" id="restartNo">Cancelar</button></span>'
+      : '<button class="linkBtn" id="restartBtn">Recomeçar do início</button>';
+  }
+  statusHtml += '</div>';
+
+  list.innerHTML = statusHtml + ids.map(function(id){ return cardHTML(byId(id)); }).join("") + pagerHTML(totalPages);
+  if(currentTab === "objetivas") updateCount();
+
+  list.querySelectorAll(".card").forEach(function(card){
+    var q = byId(card.getAttribute("data-id"));
+    if(currentTab === "objetivas" && state.picks[q.id]){
+      fillResult(card, q, state.picks[q.id], true);
+    }
+    card.querySelectorAll(".answerRow button").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        answerQuestion(card, q, btn.getAttribute("data-pick"));
+      });
+    });
+  });
+
+  var prev = document.getElementById("pgPrev"), next = document.getElementById("pgNext");
+  function go(n){ page = n; restartArmed = false; render(); window.scrollTo(0, 0); }
+  if(prev) prev.addEventListener("click", function(){ go(page-1); });
+  if(next) next.addEventListener("click", function(){ go(page+1); });
+
+  var rb = document.getElementById("restartBtn");
+  if(rb) rb.addEventListener("click", function(){ restartArmed = true; render(); });
+  var ro = document.getElementById("restartOk");
+  if(ro) ro.addEventListener("click", function(){
+    state.picks = {}; state.done = {}; saveState(state);
+    restartArmed = false; page = 1; buildOrder(); render(); window.scrollTo(0, 0);
+  });
+  var rn = document.getElementById("restartNo");
+  if(rn) rn.addEventListener("click", function(){ restartArmed = false; render(); });
+}
+
+document.querySelectorAll(".tab").forEach(function(t){
+  t.addEventListener("click", function(){
+    document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("active");});
+    t.classList.add("active");
+    currentTab = t.getAttribute("data-tab");
+    resetView();
+  });
+});
+
+fillFilters();
+buildOrder();
+render();
+
+window.EP_APP = {
+  getState: function(){ return state; },
+  setState: function(st){ st.wrong=st.wrong||{}; st.done=st.done||{}; st.picks=st.picks||{}; state = st; try{ localStorage.setItem(STORE_KEY, JSON.stringify(st)); }catch(e){} restartArmed=false; buildOrder(); render(); },
+  setQuestions: function(list){
+    if(!list || !list.length) return;
+    Q = list;
+    ["fDisc","fBanca"].forEach(function(id){ var sel=document.getElementById(id); while(sel.options.length>1) sel.remove(1); });
+    var discs = uniq(Q.map(function(q){return q.disc;})), bancas = uniq(Q.map(function(q){return q.fonte.split(" · ")[0];}));
+    discs.forEach(function(d){ var o=document.createElement("option"); o.value=d; o.textContent=d; document.getElementById("fDisc").appendChild(o); });
+    bancas.forEach(function(b){ var o=document.createElement("option"); o.value=b; o.textContent=b; document.getElementById("fBanca").appendChild(o); });
+    fDisc=""; fBanca=""; document.getElementById("fDisc").value=""; document.getElementById("fBanca").value="";
+    buildOrder(); render();
+  }
+};
+})();
+</script>
+<script>
+/* ===== Conta e sincronização (Supabase) ===== */
+(function(){
+"use strict";
+var SUPABASE_URL = "https://lqpgabhirusosilaktia.supabase.co";
+var SUPABASE_KEY = "sb_publishable_Le65NbfBqnstyrBHFlyY2g_-hm6s_ll"; /* chave publicável: pode ficar no navegador (RLS protege os dados) */
+var GUEST_KEY = "euperito_guest_v1";
+
+var wrap = document.getElementById("authWrap"), form = document.getElementById("authForm");
+var emailIn = document.getElementById("authEmail"), passIn = document.getElementById("authPass");
+var submitBtn = document.getElementById("authSubmit"), msg = document.getElementById("authMsg");
+var modeTitle = document.getElementById("authModeTitle"), switchBtn = document.getElementById("authSwitch");
+var forgotBtn = document.getElementById("authForgot"), guestBtn = document.getElementById("authGuest");
+var userBtn = document.getElementById("userBtn"), dot = document.getElementById("syncDot");
+var emailRow = document.getElementById("emailRow"), passRow = document.getElementById("passRow");
+
+var sb = null, user = null, mode = "login", pushTimer = null, recovering = false;
+try{ sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); }catch(e){ sb = null; }
+
+function isGuest(){ try{ return localStorage.getItem(GUEST_KEY) === "1"; }catch(e){ return false; } }
+function setGuest(v){ try{ v ? localStorage.setItem(GUEST_KEY,"1") : localStorage.removeItem(GUEST_KEY); }catch(e){} }
+function setDot(c, title){ dot.className = "syncDot" + (c ? " " + c : ""); dot.title = title || ""; }
+function say(t, err){ msg.textContent = t || ""; msg.className = "authMsg" + (err ? " err" : ""); }
+
+function setMode(m){
+  mode = m; say("");
+  emailRow.style.display = m === "newpass" ? "none" : "";
+  passRow.style.display = m === "forgot" ? "none" : "";
+  emailIn.required = m !== "newpass"; passIn.required = m !== "forgot";
+  passIn.autocomplete = (m === "signup" || m === "newpass") ? "new-password" : "current-password";
+  modeTitle.textContent = {login:"Entrar na sua conta", signup:"Criar conta", forgot:"Recuperar senha", newpass:"Definir nova senha"}[m];
+  submitBtn.textContent = {login:"Entrar", signup:"Criar conta", forgot:"Enviar link de recuperação", newpass:"Salvar nova senha"}[m];
+  switchBtn.textContent = m === "login" ? "Criar conta" : "Já tenho conta";
+  forgotBtn.style.display = m === "login" ? "" : "none";
+}
+function showAuth(m){ setMode(m || "login"); wrap.classList.add("show"); setTimeout(function(){ (m==="newpass"?passIn:emailIn).focus(); }, 50); }
+function hideAuth(){ wrap.classList.remove("show"); }
+
+function traduz(e){
+  var t = (e && e.message) || String(e);
+  if(/Invalid login credentials/i.test(t)) return "E-mail ou senha incorretos.";
+  if(/Email not confirmed/i.test(t)) return "Confirme seu e-mail pelo link que enviamos antes de entrar.";
+  if(/already registered/i.test(t)) return "Esse e-mail já tem conta. Use \"Já tenho conta\".";
+  if(/Password should be/i.test(t)) return "A senha precisa ter pelo menos 6 caracteres.";
+  if(/rate limit/i.test(t)) return "Muitas tentativas. Aguarde alguns minutos e tente de novo.";
+  return t;
+}
+
+switchBtn.addEventListener("click", function(){ setMode(mode === "login" ? "signup" : "login"); });
+forgotBtn.addEventListener("click", function(){ setMode("forgot"); });
+guestBtn.addEventListener("click", function(){ setGuest(true); hideAuth(); userBtn.textContent = "Entrar"; setDot("", "Sem conta: progresso só neste aparelho"); });
+userBtn.addEventListener("click", function(){
+  if(user){
+    if(confirm("Sair da conta " + (user.email||"") + "?")){ sb.auth.signOut(); }
+  } else { showAuth("login"); }
+});
+
+form.addEventListener("submit", function(ev){
+  ev.preventDefault();
+  if(!sb){ say("Sem conexão com o servidor agora. Tente mais tarde.", true); return; }
+  var email = emailIn.value.trim(), pass = passIn.value;
+  submitBtn.disabled = true; say("Aguarde…");
+  var p;
+  if(mode === "login") p = sb.auth.signInWithPassword({email:email, password:pass});
+  else if(mode === "signup") p = sb.auth.signUp({email:email, password:pass, options:{emailRedirectTo: location.origin + location.pathname}});
+  else if(mode === "forgot") p = sb.auth.resetPasswordForEmail(email, {redirectTo: location.origin + location.pathname});
+  else p = sb.auth.updateUser({password:pass});
+  p.then(function(r){
+    submitBtn.disabled = false;
+    if(r.error){ say(traduz(r.error), true); return; }
+    if(mode === "signup" && !r.data.session){ say("Conta criada! Abra o e-mail de confirmação e depois entre aqui."); setMode("login"); say("Conta criada! Abra o e-mail de confirmação e depois entre aqui."); return; }
+    if(mode === "forgot"){ say("Se o e-mail tiver conta, o link de recuperação chega em instantes."); return; }
+    if(mode === "newpass"){ recovering = false; say("Senha alterada."); hideAuth(); }
+    passIn.value = "";
+  }).catch(function(e){ submitBtn.disabled = false; say(traduz(e), true); });
+});
+
+/* ---- dados ---- */
+function rowToQ(r){
+  var q = {id:r.id, disc:r.disciplina, tema:r.assunto, fonte:[r.banca, r.concurso, r.ano].filter(Boolean).join(" · ") + (r.origem === "adaptada" ? " (adaptada)" : ""),
+    enun:r.enunciado, gab:r.gabarito, just:r.justificativa};
+  if(r.forma_correta) q.correta = r.forma_correta;
+  if(r.para_fixar) q.fixar = r.para_fixar;
+  if(r.para_fixar_chips){ q.fixarChips = r.para_fixar_chips; if(r.para_fixar_nota) q.fixarNote = r.para_fixar_nota; }
+  return q;
+}
+function loadQuestions(){
+  return sb.from("questoes").select("*").order("criado_em").order("id").then(function(r){
+    if(!r.error && r.data && r.data.length) window.EP_APP.setQuestions(r.data.map(rowToQ));
+  });
+}
+function countKeys(st){ return Object.keys((st && st.picks) || {}).length; }
+function pullProgress(){
+  setDot("busy", "Sincronizando…");
+  return sb.from("progresso").select("estado, atualizado_em").eq("user_id", user.id).maybeSingle().then(function(r){
+    if(r.error){ setDot("err", "Erro ao sincronizar"); return; }
+    var local = window.EP_APP.getState();
+    var remote = r.data && r.data.estado;
+    if(remote){
+      var lt = local.updatedAt ? Date.parse(local.updatedAt) : 0, rt = remote.updatedAt ? Date.parse(remote.updatedAt) : 0;
+      if(rt >= lt || countKeys(local) === 0){ window.EP_APP.setState(remote); setDot("on", "Progresso sincronizado"); return; }
+    }
+    if(countKeys(local) > 0 || remote){ return pushNow(local); }
+    setDot("on", "Progresso sincronizado");
+  });
+}
+function pushNow(st){
+  if(!sb || !user) return Promise.resolve();
+  setDot("busy", "Salvando…");
+  return sb.from("progresso").upsert({user_id:user.id, estado:st, atualizado_em:new Date().toISOString()}).then(function(r){
+    setDot(r.error ? "err" : "on", r.error ? "Erro ao salvar (tentará de novo)" : "Progresso sincronizado");
+  });
+}
+window.EP_SYNC = {
+  push: function(st){ if(!user) return; clearTimeout(pushTimer); pushTimer = setTimeout(function(){ pushNow(st); }, 800); },
+  logAnswer: function(id, marcou, acertou){ if(!user) return; sb.from("respostas").insert({questao_id:id, marcou:marcou, acertou:acertou}).then(function(){}); }
+};
+
+function onUser(u){
+  user = u;
+  if(u){
+    setGuest(false); if(!recovering) hideAuth();
+    userBtn.textContent = "Sair · " + (u.email || "conta"); userBtn.title = u.email || "";
+    loadQuestions().then(pullProgress);
+  } else {
+    userBtn.textContent = "Entrar"; userBtn.title = "";
+    setDot("", "Sem conta: progresso só neste aparelho");
+    if(!isGuest()) showAuth("login");
+  }
+}
+
+if(!sb){ setDot("err", "Servidor indisponível"); return; }
+sb.auth.onAuthStateChange(function(event, session){
+  if(event === "PASSWORD_RECOVERY"){ recovering = true; showAuth("newpass"); return; }
+  if(event === "SIGNED_OUT"){ onUser(null); return; }
+  if(event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "USER_UPDATED"){
+    var u = session && session.user;
+    if(!u){ if(event === "INITIAL_SESSION") onUser(null); return; }
+    if(!user || user.id !== u.id) setTimeout(function(){ onUser(u); }, 0);
+    if(event === "USER_UPDATED") hideAuth();
+  }
+});
+document.addEventListener("visibilitychange", function(){ if(document.visibilityState === "visible" && user) pullProgress(); });
+})();
+</script>
+</body>
+</html>
